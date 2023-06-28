@@ -1,6 +1,11 @@
 **/*.dll
 **/*.exe
+**/*.mtl
+**/*.obj
 **/*.pdb
+
+.cache/
+.vscode/
 
 build/
 lib/
