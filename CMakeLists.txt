@@ -123,8 +123,8 @@ endif()
 #===============================================================================
 
 if(PISTACCHIO_BUILD_EXAMPLES)
-	add_subdirectory(examples/imgui)
+	# add_subdirectory(examples/imgui)
 	add_subdirectory(examples/obj)
-	add_subdirectory(examples/red-rom-viewer)
+	# add_subdirectory(examples/red-rom-viewer)
 	add_subdirectory(examples/triangulation)
 endif()
