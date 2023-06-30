@@ -5,6 +5,8 @@
 #include <vector>
 
 //
+// Use `OBJ::load` to load an .obj from a path and construct an `OBJ`.
+//
 // Specification: http://paulbourke.net/dataformats/obj/
 //
 struct OBJ {
