@@ -40,8 +40,8 @@ endif()
 # glad
 
 if(PISTACCHIO_ENABLE_OPENGL)
-	add_library(glad INTERFACE)
-	target_include_directories(glad INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include)
+	add_library(pistacchio_glad INTERFACE)
+	target_include_directories(pistacchio_glad INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glad/include)
 endif()
 
 # GLM
@@ -54,8 +54,8 @@ find_package(SDL2 CONFIG REQUIRED)
 
 # stb
 
-add_library(stb INTERFACE)
-target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb)
+add_library(pistacchio_stb INTERFACE)
+target_include_directories(pistacchio_stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/stb)
 
 # Vulkan
 
@@ -81,7 +81,7 @@ target_compile_options(pistacchio PRIVATE -Wall -Wextra)
 target_link_libraries(pistacchio
 	PUBLIC
 		glm::glm
-		stb
+		pistacchio_stb
 		$<${WIN32}: SDL2::SDL2main>
 		SDL2::SDL2)
 
@@ -96,7 +96,7 @@ target_sources(pistacchio PRIVATE
 	src/filesystem/obj.cc)
 
 if(PISTACCHIO_ENABLE_OPENGL)
-	target_link_libraries(pistacchio PUBLIC glad)
+	target_link_libraries(pistacchio PUBLIC pistacchio_glad)
 
 	target_sources(pistacchio PRIVATE
 		src/gl/shader.cc
@@ -123,7 +123,7 @@ endif()
 #===============================================================================
 
 if(PISTACCHIO_BUILD_EXAMPLES)
-	# add_subdirectory(examples/imgui)
+	add_subdirectory(examples/hello-world)
 	add_subdirectory(examples/obj)
 	# add_subdirectory(examples/red-rom-viewer)
 	add_subdirectory(examples/triangulation)
