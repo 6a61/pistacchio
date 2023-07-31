@@ -13,9 +13,12 @@
 #include "pistacchio/app.hh"
 #include "pistacchio/input.hh"
 #include "pistacchio/log.hh"
+#include "pistacchio/types.hh"
 #include "pistacchio/filesystem/obj.hh"
 #include "pistacchio/gl/shader.hh"
 #include "pistacchio/gl/window.hh"
+
+using vec3 = glm::vec3;
 
 static auto _log = Log("OBJ");
 
@@ -26,30 +29,33 @@ private:
 		{ ShaderGL::VERTEX, "default.vert" },
 		{ ShaderGL::FRAGMENT, "default.frag" }
 	});
+
 	OBJ obj = OBJ::load("suzanne.obj");
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> normals;
-	std::vector<uint32_t> indices;
+	std::vector<vec3> vertices;
+	std::vector<vec3> normals;
+	std::vector<u32> indices;
 
 	glm::mat4 projection;
 	glm::mat4 model;
 	glm::mat4 view;
 
-	float camera_rotation[3] = { 0.0f, 0.0f, 0.0f };
-	float camera_position[3] = { 0.0f, 0.0f, -4.5f };
-	glm::vec3 object_color = glm::vec3{ 1.0f };
-	glm::vec3 model_rotation = glm::vec3{ 0.0f, 30.0f, 0.0f };
-	glm::vec3 light_position = glm::vec3{ 0.0f, 3.0f, 3.0f };
-	glm::vec3 light_color = glm::vec3{ 1.0f };
-	float ambient_strength = 0.2f;
-	float model_opacity = 1.0f;
-	bool wireframe = false;
-	bool flat_shading = true;
+	vec3  camera_rotation    = { 0.0f, 0.0f, 0.0f };
+	vec3  camera_position    = { 0.0f, 0.0f, -4.5f };
+	vec3  object_color       = { 1.0f, 0.25f, 0.25f };
+	vec3  model_rotation     = { 0.0f, 30.0f, 0.0f };
+	vec3  light_position     = { 12.0f, 24.0f, 12.0f };
+	vec3  light_color        = { 1.0f, 1.0f, 1.0f };
+	float ambient_strength   = 0.2f;
+	float specular_strength  = 0.5f;
+	float model_opacity      = 1.0f;
+	int   specular_shininess = 8;
+	bool  wireframe          = false;
+	bool  flat_shading       = false;
 
-	uint32_t vao = GL_NONE;
-	uint32_t buffer_vertices = GL_NONE;
-	uint32_t buffer_normals = GL_NONE;
-	uint32_t buffer_indices = GL_NONE;
+	u32 vao = GL_NONE;
+	u32 buffer_vertices = GL_NONE;
+	u32 buffer_normals = GL_NONE;
+	u32 buffer_indices = GL_NONE;
 public:
 	ObjApp() : App(30, 60)
 	{
@@ -157,37 +163,33 @@ public:
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::SetNextWindowSize(ImVec2(320, 0));
 
-		ImGui::Begin("##debug", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-		ImGui::PushItemWidth(-5.0f * ImGui::GetFontSize());
+		if (ImGui::Begin("Settings##debug", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::PushItemWidth(-5.0f * ImGui::GetFontSize());
 
-		ImGui::Text("Camera");
-		ImGui::DragFloat3("Rotation##camrotX", &camera_rotation[0], 1.0f, -360.0f, 360.0f);
-		ImGui::DragFloat3("Position##camposX", &camera_position[0], 0.05f, -10.0f, 10.0f);
-		ImGui::NewLine();
-		ImGui::Separator();
+			ImGui::Text("Camera");
+			ImGui::DragFloat3("Rotation##camrotX", &camera_rotation[0], 1.0f);
+			ImGui::DragFloat3("Position##camposX", &camera_position[0], 0.05f);
+			ImGui::Separator();
 
-		ImGui::Text("Model");
-		ImGui::DragFloat3("Rotation##modelRotation", &model_rotation[0], 1.0f, -360.0f, 360.0f);
-		ImGui::ColorEdit3("Color##objectColor", &object_color.x);
-		ImGui::SliderFloat("Opacity##model_opacity", &model_opacity, 0.0f, 1.0f);
-		ImGui::NewLine();
-		ImGui::Separator();
+			ImGui::Text("Model");
+			ImGui::DragFloat3("Rotation##modelRotation", &model_rotation[0], 1.0f);
+			ImGui::ColorEdit3("Color##objectColor", &object_color.x);
+			ImGui::SliderFloat("Opacity##model_opacity", &model_opacity, 0.0f, 1.0f);
+			ImGui::Separator();
 
-		ImGui::Text("Light");
-		ImGui::DragFloat3("Position##lightPosition", &light_position[0], 0.05f, -100.0f, 100.0f);
-		ImGui::ColorEdit3("Color##lightColor", &light_color.x);
-		ImGui::SliderFloat("Ambient##ambientStrength", &ambient_strength, 0.0f, 1.0f);
-		ImGui::NewLine();
-		ImGui::Separator();
+			ImGui::Text("Light");
+			ImGui::DragFloat3("Position##lightPosition", &light_position[0], 0.05f);
+			ImGui::ColorEdit3("Color##lightColor", &light_color.x);
+			ImGui::SliderFloat("Ambient##ambientStrength", &ambient_strength, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular##specularStrength", &specular_strength, 0.0f, 1.0f);
+			ImGui::SliderInt("Shininess##specularShininess", &specular_shininess, 1, 256);
+			ImGui::Separator();
 
-		ImGui::Text("Misc.");
-		ImGui::Checkbox("Wireframe", &wireframe);
-		ImGui::SameLine();
-		ImGui::Checkbox("Flat shading", &flat_shading);
-
-		// ImGui::ShowDemoWindow();
-
-		ImGui::End();
+			ImGui::Text("Misc.");
+			ImGui::Checkbox("Wireframe", &wireframe);
+			ImGui::SameLine();
+			ImGui::Checkbox("Flat shading", &flat_shading);
+		}; ImGui::End();
 
 		ImGui::EndFrame();
 	}
@@ -200,7 +202,7 @@ public:
 		glClearBufferfv(GL_DEPTH, 0, &clear_depth);
 
 		view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3{camera_position[0], camera_position[1], camera_position[2]});
+		view = glm::translate(view, camera_position);
 		view = glm::rotate(view, glm::radians(camera_rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
 		view = glm::rotate(view, glm::radians(camera_rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
 		view = glm::rotate(view, glm::radians(camera_rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -219,6 +221,9 @@ public:
 		shader.uniform("ambient_strength", ambient_strength);
 		shader.uniform("flat_shading", flat_shading);
 		shader.uniform("model_opacity", model_opacity);
+		shader.uniform("view_position", camera_position);
+		shader.uniform("specular_strength", specular_strength);
+		shader.uniform("specular_shininess", specular_shininess);
 
 		glUseProgram(shader.id());
 		glBindVertexArray(vao);
