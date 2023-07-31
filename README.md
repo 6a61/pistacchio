@@ -2,14 +2,14 @@
 
 A C++ framework for making real-time applications.
 
-# Dependencies
+## Dependencies
 
 - GLM
 - SDL2
 - **(optional)** FreeType
 - **(optional)** OpenGL
 
-# Building
+## Building
 
 Only Clang is currently supported.
 
@@ -24,6 +24,11 @@ cmake -B build
 cmake --build build
 ```
 
-# License
+## License
 
-See [LICENSE](/LICENSE).
+See [LICENSE](/LICENSE). For files under the `thirdparty/` directories check
+with the original license holders.
+
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [glad](https://github.com/Dav1dde/glad)
+- [stb](https://github.com/nothings/stb)
