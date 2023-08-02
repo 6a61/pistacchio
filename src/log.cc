@@ -4,11 +4,11 @@
 #include "pistacchio/log.hh"
 
 namespace color {
-	std::string reset  = "\033[0m";
-	std::string red    = "\033[31m";
-	std::string green  = "\033[32m";
-	std::string yellow = "\033[33m";
-	std::string purple = "\033[35m";
+	const std::string reset  = "\033[0m";
+	const std::string red    = "\033[31m";
+	const std::string green  = "\033[32m";
+	const std::string yellow = "\033[33m";
+	const std::string purple = "\033[35m";
 }
 
 std::unordered_map<std::string, uint32_t> Log::s_filters;
@@ -24,7 +24,7 @@ std::string timestamp()
 }
 
 Log::Log(const std::string& id) :
-	m_id(id)
+	m_id{ id }
 {
 }
 
